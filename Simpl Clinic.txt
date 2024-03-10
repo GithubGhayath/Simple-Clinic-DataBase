@@ -1,0 +1,116 @@
+use [Simple Clinic];
+exec sp_changedbowner 'sa'
+
+
+
+create table Persons
+(
+	ID int primary key identity(1,1),
+	FirstName nvarchar(100) not null,
+	MidName nvarchar(100) not null,
+	LastName nvarchar(100) not null,
+	Address nvarchar(max) not null,
+	BirthDate date not null,
+	Gender char(1) not null,
+	constraint CHK_GenderAndBirthDate check (Gender ='F'or Gender='M'And BirthDate >= getDate())
+)
+
+
+
+Alter table Persons
+Add check ((Gender ='F'or Gender='M')And (BirthDate >= getDate()))
+
+create Table PhoneNumbers
+(
+	ID int primary key identity(1,1),
+	Phone nvarchar(50) not null,
+	Person_ID int not null,
+	constraint FK_PersonPhone foreign key(Person_ID) references Persons(ID)
+)
+
+create Table Emails
+(
+	ID int primary key identity(1,1),
+	Email nvarchar(100) not null,
+	Person_ID int not null,
+	constraint FK_PersonEmail foreign key (Person_ID) references Persons(ID)
+)
+
+create Table Doctors
+(
+	ID int primary key identity(1,1),
+	Spicalization nvarChar(max) not null,
+	Person_ID int not null,
+	constraint FK_PersonDoctor foreign key(Person_ID) references Persons(ID)
+) 
+
+create Table Patients
+(
+	ID int Primary key identity (1,1),
+	Person_ID int not null,
+	constraint FK_PersonPatient foreign key(Person_ID) references Persons(ID)
+)
+
+create table AppoitmentStatue
+(
+	ID int primary key ,
+	Pending char(1) null Check(Pending='T' or Pending='F'),
+	Confirmed char(1) null Check(Confirmed='T' or Confirmed='F'),
+	Completed char(1) null Check(Completed='T' or Completed='F'),
+	Canceled char(1) null Check(Canceled='T' or Canceled='F'),
+	Rescheduled char(1) null Check(Rescheduled='T' or Rescheduled='F'),
+	NoShow char(1) null Check(NoShow='T' or NoShow='F')
+)
+
+create table Prescriptions
+(
+	ID int primary key,
+	MedicationName nvarchar(max),
+	SpecialInstructions nvarchar(max),
+	Dosage nvarchar(max),
+	Frequency int ,
+	StartDate date ,
+	EndDate date
+)
+
+
+create Table MedicalRecord
+(
+	ID int primary key ,
+	DescriptionOfVisit nvarchar(max) null,
+	Diagnosis nvarchar(max) null,
+	AdditionalNotes nvarchar(max) null,
+	Prescription_ID int not null,
+	Constraint FK_Prescription_ID foreign key(Prescription_ID) references Prescriptions(ID)
+)
+
+create table Payments
+(
+	ID int primary key,
+	PaymentDate date not null,
+	PaymentMethod nvarchar(max) null,
+	Amount money not null,
+	AdditionalNotes nvarchar(max)
+)
+
+
+
+
+create Table Appoitments
+(
+	ID int primary key identity(1,1),
+	AppoitmentDate Date not null,
+	AppoitmentTime time not null,
+	Doctor_ID int not null,
+	Patient_ID int not null,
+	Appoitment_Statue int not null,
+	MedicalRecord_ID int null,
+	Payment_ID int not null,
+	constraint FK_DoctorID foreign key(Doctor_ID) references Doctors(ID),
+	constraint FK_PatientID foreign key(Patient_ID) references Patients(ID),
+	constraint FK_AppoitmentStatue foreign key(Appoitment_Statue) references AppoitmentStatue(ID),
+	constraint FK_MedicalRecord_ID foreign key(MedicalRecord_ID) references MedicalRecord(ID),
+	constraint FK_Payment_ID foreign key (Payment_ID) references Payments(ID)
+)
+
+
